@@ -25,17 +25,6 @@
 				"navigationStyle": "custom"
 			}
 		}
-		
-	    ,{
-            "path" : "pages/index/about",
-            "style" :                                                                                    
-            {
-              "navigationBarTitleText": "关于",
-              "navigationBarBackgroundColor":"#191925",
-              "navigationBarTextStyle":"white"
-            }
-            
-        }
     ],
 	"subPackages": [{
 		"root": "pages/public",

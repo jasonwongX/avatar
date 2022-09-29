@@ -5,7 +5,7 @@
 			<!-- <image src="/static/images/editor_bg.png" mode="widthFix" class="all-back"></image> -->
 		</view>
 		<view class="top-content">
-			<scroll-view scroll-x :show-scrollbar="true" class="scroll-view">
+			<scroll-view scroll-x :show-scrollbar="true" class="scroll-view" v-if="false">
 				<view class="top-title">
 					<view class="title-unit" :class="{ 'title-select': item.selected }"
 						v-for="(item, index) in categoriesList" :key="item._id" @click="switchCategory(item)">
@@ -13,11 +13,21 @@
 					</view>
 				</view>
 			</scroll-view>
+			<text class="description">邀请3位朋友可解锁所有头像框（{{sharedCount}} / 3）</text>
 			<scroll-view scroll-x :show-scrollbar="true" class="scroll-view">
 				<view class="image-div">
 					<view :class="{ 'image-margin': index !== 0 }" v-for="(info, index) in imageList" :key="info._id"
 						@click="imageClick(info)">
 						<image :src="info.image_url"></image>
+					</view>
+				</view>
+			</scroll-view>
+			<scroll-view scroll-x :show-scrollbar="true" class="scroll-view">
+				<view class="image-div">
+					<view :class="{ 'image-margin': index !== 0 } " v-for="(info, index) in imageEnList" :key="info._id"
+						@click="imageEnClick(info)">
+						<image v-if="hasMorePermission" :src="info.image_url" ></image>
+						<image v-else :src="info.image_url" class="image-en"></image>
 					</view>
 				</view>
 			</scroll-view>
@@ -38,15 +48,14 @@
 				<view class="ctlbtn">
 					<button class="action-btn btn-margin" @click="getUserProfile('createImages')">获取头像</button>
 					<button class="action-btn  share-btn btn-margin" @click="shareFc()">保存头像</button>
-					<button class="action-btn btn-about btn-margin" @click="toAbout()">关于作者</button>
-					<button open-type="share" class="action-btn  btn-primary">发给朋友</button>
+					<!-- <button class="action-btn btn-about btn-margin" @click="toAbout()">关于作者</button> -->
+					<button open-type="share" class="action-btn  btn-primary" @click="shareMPweixin">发给朋友</button>
 				</view>
 			</view>
 		</view>
 		<view style="margin: 20px;">
 			<ad unit-id="adunit-1b3406fe9b8e676a" ad-type="video" ad-theme="white"></ad>
 		</view>
-
 
 		<view class="hideCanvasView">
 			<canvas class="hideCanvas" id="default_PosterCanvasId" canvas-id="default_PosterCanvasId"
@@ -75,7 +84,51 @@
 				avatarImage: uni.getStorageSync('avatar_image'),
 				currentImage: {},
 				currentIndex: 0,
-				imageList: [],
+				imageEnList: [
+					{
+						_id:11,
+						image_url:"/static/avatar/more/cover1.png",
+					},
+					{
+						_id:12,
+						image_url:"/static/avatar/more/cover2.png",
+					},
+					{
+						_id:13,
+						image_url:"/static/avatar/more/cover3.png",
+					},
+					{
+						_id:14,
+						image_url:"/static/avatar/more/cover4.png",
+					},
+					{
+						_id:15,
+						image_url:"/static/avatar/more/cover5.png",
+					}
+				],
+				
+				imageList: [
+					{
+						_id:1,
+						image_url:"/static/avatar/cover1.png",
+					},
+					{
+						_id:2,
+						image_url:"/static/avatar/cover2.png",
+					},
+					{
+						_id:3,
+						image_url:"/static/avatar/cover3.png",
+					},
+					{
+						_id:4,
+						image_url:"/static/avatar/cover4.png",
+					},
+					{
+						_id:5,
+						image_url:"/static/avatar/cover5.png",
+					}
+				],
 				categoriesList: [],
 				shareInfo: {
 					title: "庆国庆，换新颜，快来领取你的国庆头像吧",
@@ -86,8 +139,17 @@
 		},
 		onLoad() {
 			this.init();
-			this.getCategoriesList();
+			// this.getCategoriesList();
 			uni.setStorageSync('shareInfo', this.shareInfo);
+		},
+		computed:{
+			sharedCount() {
+				return uni.getStorageSync('shared_count') ? uni.getStorageSync('shared_count') : 0
+			},
+			hasMorePermission() {
+				const count = uni.getStorageSync('shared_count') ? uni.getStorageSync('shared_count') : 0
+				return count >= 3
+			}
 		},
 		
 		onShareAppMessage: function() {
@@ -113,6 +175,7 @@
 						}
 					})
 					.then(res => {
+						debugger
 						this.categoriesList = res.result.data;
 						if (this.categoriesList.length > 0) {
 							this.$set(this.categoriesList[0], 'selected', true);
@@ -176,6 +239,7 @@
 			 */
 			async init() {
 				this.userInfo = uni.getStorageSync('user_info');
+				this.currentImage = this.imageList[0];
 			},
 			/**
 			 * @param {Object} item
@@ -196,6 +260,11 @@
 			 */
 			imageClick(item) {
 				this.currentImage = item;
+			},
+			imageEnClick(item) {
+				if(this.hasMorePermission) {
+					this.currentImage = item;
+				}
 			},
 			/**
 			 * 获取微信code
@@ -381,6 +450,11 @@
 					fail(fall) {}
 				});
 			},
+			shareMPweixin() {
+				this.avatarImage = uni.getStorageSync('avatar_image');
+				const sharedCount = uni.getStorageSync('shared_count') ? uni.getStorageSync('shared_count') : 0;
+				uni.setStorageSync('shared_count',sharedCount + 1);
+			},
 			/**
 			 * @param {Object} nickName
 			 * 存储用户数据
@@ -422,7 +496,7 @@
 	}
 	.content {
 		background-size: 100% 100%;
-		padding-top: 300rpx;
+		padding-top: 260rpx;
 		height: 100%;
 		.editor_bg{
 			position: fixed;
@@ -443,18 +517,26 @@
 		}
 
 		.top-content {
-			background-color: #ffffff;
+			background-color: #f8ece2;
 			// margin: 30rpx;
-			border-radius: 50rpx;
+			border-radius: 10rpx;
+			margin-left:20rpx;
+			margin-right: 20rpx;
 			padding: 0 40rpx 30rpx;
 			position: relative;
+			.description {
+				margin-top: 20rpx;
+				font-size: 28rpx;
+				flex-shrink: 0;
+				color: #ff4500;
+			}
 
 			.top-title {
 				display: flex;
 				align-items: center;
 
 				.title-unit {
-					padding: 40rpx 20rpx;
+					padding: 20rpx 20rpx;
 					font-size: 28rpx;
 					flex-shrink: 0;
 				}
@@ -470,8 +552,8 @@
 				display: flex;
 				align-items: center;
 				padding-left: 20rpx;
-				padding-bottom: 20rpx;
-				background-color: #ffffff;
+				padding-top: 30rpx;
+				background-color: #f8ece2;
 
 				image {
 					width: 120rpx;
@@ -484,6 +566,17 @@
 				.image-margin {
 					margin: 0 20rpx;
 				}
+				.image-en:after {
+					position: absolute;
+					top: 0;
+					left: 0;
+					content: '';
+					background-color: gray;
+					opacity: 0.8;
+					z-index: 1;
+					width: 100%;
+					height: 100%;
+				}
 			}
 		}
 
@@ -492,8 +585,53 @@
 			justify-content: center;
 			align-items: center;
 			position: relative;
-
 		}
+		
+		.footer-content {
+			background-color: #f8ece2;
+			// margin: 30rpx;
+			border-radius: 50rpx;
+			padding: 0 40rpx 30rpx;
+			position: relative;
+		
+			.top-title {
+				display: flex;
+				align-items: center;
+		
+				.title-unit {
+					padding: 20rpx 20rpx;
+					font-size: 28rpx;
+					flex-shrink: 0;
+				}
+		
+				.title-select {
+					font-size: 30rpx;
+					font-weight: bold;
+					color: #ff4500;
+				}
+			}
+		
+			.image-div {
+				display: flex;
+				align-items: center;
+				padding-left: 20rpx;
+				padding-top: 30rpx;
+				background-color: #f8ece2;
+		
+				image {
+					width: 120rpx;
+					height: 120rpx;
+					border: 1rpx solid #f8f8f8;
+					box-shadow: 0px -5px 15px 0px rgba(224, 224, 224, 0.4);
+					flex-shrink: 0;
+				}
+		
+				.image-margin {
+					margin: 0 20rpx;
+				}
+			}
+		}
+		
 	}
 
 	.title {

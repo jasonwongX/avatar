@@ -7,8 +7,8 @@ exports.main = async (event, context) => {
 		context
 	})
 	let js_code = event.code
-	const appid = '' // 请更换为您的appid  
-	const secret = '' // 请更换为您的secret  
+	const appid = 'wxf6a0bc2ee21f84b0' // 请更换为您的appid  
+	const secret = 'abc10d24439b0d76c29cb8d060459025' // 请更换为您的secret  
 	const loginUrl = 'https://api.weixin.qq.com/sns/jscode2session'
 
 	let res = await uniCloud.httpclient.request(loginUrl, {

@@ -10,7 +10,7 @@
 			<button class="action-btn" @click="navIndex()">再来一张</button>
 		</view>
 		<view style="margin: 20px;">
-			<ad unit-id="adunit-eea0028c636292bf"></ad>
+			<ad unit-id="adunit-eea0028c636292bf" v-if="false"></ad>
 		</view>
 	</view>
 </template>
@@ -42,6 +42,8 @@
 		methods: {
 			shareMPweixin() {
 				this.avatarImage = uni.getStorageSync('avatar_image');
+				const sharedCount = uni.getStorageSync('shared_count') ? uni.getStorageSync('shared_count') : 0;
+				uni.setStorageSync('shared_count',sharedCount + 1);
 			},
 			/**
 			 * 返回上一页
